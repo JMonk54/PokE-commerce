@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Welcome!</title>
+{% endblock %}
+
+{% block body %}
+<h1>Hello, {{user.name.title()}}!</h1>
+<p>Ready to add pokemon into the pc?</p>
+
+<form action="/poke_list" method="POST" class="content-1">
+    <input type="text" name="pokemon_name" id="pokemon_name" value="Pokemon Name">
+    <input type="submit" class="button" value="Pokemon-Data Input" href="{add_pokemon}"/>
+    
+</form>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+    </tr>
+    {% for pokemon in user.pokemons %}
+    <tr>
+        <td>{{pokemon.id}}</td>
+        <td>{{pokemon.name.title()}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<form action="/delete" method="POST" class="content">
+    <p>Pokemon's ID</p>
+    <input type="text" name="pokemon_id" id="pokemon_id">
+    <input type="submit" class="Button" value="Delete" href="{url_for('delete_pokemon')}">
+</form>
+
+{% endblock %}

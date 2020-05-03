@@ -1,0 +1,40 @@
+body, html {
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+}
+p {
+    text-align: center;
+}
+
+table, td, th {
+    border: 1px solid red;
+}
+
+table {
+    border-collapse: collapse;
+    width: 50%;
+    margin: 0 auto;
+}
+
+th {
+    height: 30px;
+}
+
+td {
+    text-align: center;
+    padding: 1px;
+}
+
+.content {
+    text-align: center;
+    margin-top: 5%;
+}
+
+.content-1 {
+    text-align: center;
+    margin-top: 5%;
+}
+

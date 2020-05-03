@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Pokemon</title>
+{% endblock %}
+
+{% block body %}
+<table>
+    <tr>
+        <th>Number</th>
+        <th>Pokemon</th>
+        <th>Action</th>
+    </tr>
+    {% for pokemon in user.poke_belt %}
+    <tr>
+        <td>
+            <img src="/static/images/pokeball_1.png" height="90" width="90">
+        </td>
+        <td>
+            <h4>{{pokemon.name.title()}}</h4>
+            <br>
+            <img src="https://pokeres.bastionbot.org/images/pokemon/{{pokemon.pokeid}}.png" height="90" width="90">
+        </td>
+        <td>
+            <form action="/delete" method="POST">
+                <input type="hidden" name="pokemon_id" id="pokemon_name" value="{{pokemon.id}}">
+                <input type="submit" class="button" value="Remove">
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Pokemon List</title>
+{% endblock %}
+
+{% block body %}
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Types</th>
+        <th>Action</th>
+    </tr>
+    {% for pokemon in pokemonData %}
+    <tr>
+        <td>{{pokemon.id}}</td>
+        <td><h4>{{pokemon.name.title()}}
+            <br>
+            <img src="https://pokeres.bastionbot.org/images/pokemon/{{pokemon.id}}.png" height="80" width="80"  alt="" srcset="">
+        </h4></td>
+        <td>
+            <ul>
+                <li>
+                    {{pokemon.types.0}}
+                    <br>
+                    {{pokemon.types.1}}
+                </li>
+                
+            </ul>
+        </td>
+        <td>
+            <form action="/test" method="POST">
+                <input type="hidden" name="pokemon_name" id="pokemon_name" value="{{pokemon.name}}">
+                <input type="hidden" name="pokemon_id" id="pokemon_id" value="{{pokemon.id}}">
+                <input type="submit" class="button" value="Pokemon-Data Input">
+            </form>
+        </td>
+    
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
