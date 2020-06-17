@@ -1,13 +1,49 @@
-{% extends 'base.html' %}
-
-{% block head %}
+{% extends 'base.html' %} {% block head %}
 <title>Login</title>
-{% endblock %}
+{% endblock %} {% block body %}
 
-{% block body %}
-<form action="/logmein" method="POST">
-    <input type="text" name="trainer" id="trainer" value="Username">
-    <input type="password" name="password" id="password" value="Password">
-    <input type="submit" value="Login">
-</form>
+<nav
+  class="navbar navbar-expand-sm navbar-dark"
+  style="
+    background: linear-gradient(
+      90deg,
+      rgba(233, 14, 51, 1) 0%,
+      rgba(91, 154, 222, 1) 69%,
+      rgba(7, 204, 244, 1) 100%
+    );
+  "
+>
+  <a href="#" class="navbar-brand">Kanto Shelter</a>
+
+</nav>
+
+
+<div class="container-fluid bg">
+  <div class="row">
+    <div class="col-md-4 col-sm-12 col-xs-4"></div>
+    <div class="col-md-4 col-sm-12 col-xs-4">
+      <!--Form Start-->
+      <form action="/logmein" class="form-container" method="POST">
+        <h1 class="text-center">Kanto Poke-Shelter</h1>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" name="trainer" id="username" aria-describedby="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-block" id="login-btn">Login</button>
+        <div class="border-line"></div>
+        <hr style="width: 60%;">
+        <p class="text-center">
+          Don't have an account? <a href="{{ url_for('register') }}">Sign Up!<i class="fas fa-user-plus" id="sign-in"></i></a>
+        </p>
+      </form>
+      <!--Form End-->
+    </div>
+    <div class="col-md-4 col-sm-12 col-xs-4"></div>
+  </div>
+</div>
+
 {% endblock %}

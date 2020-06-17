@@ -1,4 +1,4 @@
-from app import app
+from app import app, cache
 from models import *
 from flask import render_template
 from flask import request, redirect
@@ -8,21 +8,24 @@ from flask_admin import AdminIndexView, Admin
 from flask_admin.contrib.sqla import ModelView
 import requests
 import json
+import random
 
 # Lets your application and Flask-Login work together
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+# Cache
+CACHE = {}
+poke_CACHE = {}
 
 @login_manager.user_loader
 def load_user(user_id):
     return Trainer.query.get(int(user_id))
 
 
-#@app.route('/')
-#def index():
-#    trainer = Trainer.query.filter_by(name='Corn').first()
-#    login_user(trainer)
-#    return 'You are now logged in!'
+@app.route('/')
+def index():
+    return render_template('login.html')
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -54,7 +57,7 @@ def logmein():
     
     login_user(user)
 
-    return f'<h1>Hello, {user.name.title()}'
+    return redirect(url_for('pokemons'))
 
    
 
@@ -62,25 +65,10 @@ def logmein():
 @login_required
 def logout():
     logout_user()
-    return 'You are now logged out!'
+    return render_template('login.html')
 
 
-@app.route('/poke_list', methods=['POST', 'GET'])
-@login_required
-def add_pokemon():
-    if request.method == 'POST':
-        p_name = request.form['pokemon_name']
-        new_pokemon = Pokemon(name=p_name, owner=current_user)
 
-        try:
-            db.session.add(new_pokemon)
-            db.session.commit()
-            return redirect('/poke_list')
-        except Exception as e:
-            print(e)
-            raise
-    else:
-        return render_template('greet_trainer.html', user=current_user)
 
 
 @app.route('/delete', methods=['POST', 'GET'])
@@ -104,29 +92,63 @@ def delete_pokemon():
 
 @app.route('/pokemons', methods=['POST', 'GET'])
 @login_required
+@cache.cached(timeout=5)
 def pokemons():
-    
-    response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=151")
+    data = CACHE.get("data")
+    """
+    {
+        "data": {...stuff...},
+    }
+    """
+    #print(f"MMOREL {data}")
+    if data:
+        allPokemon = data
+    else:
+        response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=151")
 
-    allPokemon = response.json()
+        allPokemon = response.json()['results']
+        CACHE['data'] = allPokemon
     #print(allPokemon)
 
     pokemonData = []
-    
-    
-    for url in allPokemon['results']:
-        pokemon_url = url['url']
-        poke_response = requests.get(pokemon_url)
-        pokeData = poke_response.json()
 
-        pokeInfo = {
-            'id': pokeData['id'],
-            'name': pokeData['name'],
-            'types': fetchPokemonTypes(pokeData['types']),
-        
-        }
-        #print(pokeInfo)
-        pokemonData.append(pokeInfo)
+
+    pokemon_data = poke_CACHE.get('pokemon_data')
+    print(f"JORN {pokemon_data}")
+    """
+    {
+        pokemon_data: [
+            {"name": "mew", url: "asdf"},
+        ],
+        "mew": {'id': 151, 'name': 'mew', 'types': ['psychic']},
+        "mewtwo": {'id': 150, 'name': 'mewtwo', 'types': ['psychic']},
+        ...
+    }
+    """
+    for pokemon_dict in allPokemon:
+        pokemon_name = pokemon_dict.get("name")
+
+        print(f"Fetching data for {pokemon_name}")
+        pokemon_data = CACHE.get(pokemon_name)
+
+        if not pokemon_data:
+            print(f"Cache did not have data for {pokemon_name}, fetching from api...")
+            pokemon_url = pokemon_dict['url']
+
+            response = requests.get(pokemon_url)
+            response_json = response.json()
+            
+            poke_info = {
+                'id': response_json['id'],
+                'name': response_json['name'],
+                'types': fetchPokemonTypes(response_json['types']),
+            }
+
+            CACHE[pokemon_name] = poke_info
+            print(f"Set data for {pokemon_name} in cache: {CACHE.get(pokemon_name)}")
+            pokemon_data = poke_info
+
+        pokemonData.append(pokemon_data)
 
 
     if request.method == "POST":
@@ -140,9 +162,8 @@ def pokemons():
             print(e)
             raise
     else:
-
-           
-        return render_template('pokemon_list.html', pokemonData=pokemonData)
+        print(f"MMOREL RETURN len: {len(pokemonData)} content: {pokemonData}")           
+        return render_template('pokemon_list.html', pokemonData=pokemonData, user=current_user)
 
 def fetchPokemonTypes(types):
     # return 1-2 type names
@@ -150,13 +171,16 @@ def fetchPokemonTypes(types):
     type_names = []
     for type in types:
         type_name = type['type']['name']
-        print(f"Type name {type_name}")
+        #print(f"Type name {type_name}")
         type_names.append(type_name)
 
     return type_names    
 
+
+
 @app.route('/test', methods=['POST', 'GET'])
 @login_required
+@cache.cached(timeout=5)
 def test():
 
     if request.method == "POST":
@@ -190,7 +214,10 @@ def pokemon_storage():
     return render_template('pokemon_belt.html', user=current_user)
 
 
-
+@app.route('/pokecart')
+@login_required
+def pokemon_cart():
+    return render_template('pokemon_belt.html', user=current_user)
 
 
 
